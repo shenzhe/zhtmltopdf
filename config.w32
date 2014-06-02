@@ -1,0 +1,13 @@
+// $Id$
+// vim:ft=javascript
+
+// If your extension references something external, use ARG_WITH
+// ARG_WITH("zhtmltopdf", "for zhtmltopdf support", "no");
+
+// Otherwise, use ARG_ENABLE
+// ARG_ENABLE("zhtmltopdf", "enable zhtmltopdf support", "no");
+
+if (PHP_ZHTMLTOPDF != "no") {
+	EXTENSION("zhtmltopdf", "zhtmltopdf.c");
+}
+
