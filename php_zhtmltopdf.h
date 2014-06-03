@@ -44,7 +44,8 @@ PHP_RINIT_FUNCTION(zhtmltopdf);
 PHP_RSHUTDOWN_FUNCTION(zhtmltopdf);
 PHP_MINFO_FUNCTION(zhtmltopdf);
 
-PHP_FUNCTION(zhtml2pdf);	/* For testing, remove later. */
+PHP_FUNCTION(zhtml2pdf);
+PHP_FUNCTION(zhtml2img);
 
 /* 
   	Declare any global variables you may need between the BEGIN
@@ -52,6 +53,7 @@ PHP_FUNCTION(zhtml2pdf);	/* For testing, remove later. */
 */
 ZEND_BEGIN_MODULE_GLOBALS(zhtmltopdf)
 int  zhtml2pdf_initialized;
+int  zhtml2img_initialized;
 ZEND_END_MODULE_GLOBALS(zhtmltopdf)
 /**/
 

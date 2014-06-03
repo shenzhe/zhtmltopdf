@@ -28,6 +28,8 @@
 #include "ext/standard/info.h"
 #include "php_zhtmltopdf.h"
 #include "wkhtmltox/pdf.h"
+#include "wkhtmltox/image.h"
+
 
 ///* If you declare any globals in php_zhtmltopdf.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(zhtmltopdf)
@@ -36,11 +38,6 @@ ZEND_DECLARE_MODULE_GLOBALS(zhtmltopdf)
 /* True global resources - no need for thread safety here */
 //static int le_zhtmltopdf;
 
-static void php_zhtmltopdf_init_globals(zend_zhtmltopdf_globals *zhtmltopdf_globals)
-{
-    zhtmltopdf_globals->zhtml2pdf_initialized = 0;
-}
-
 
 /* {{{ zhtmltopdf_functions[]
  *
@@ -48,6 +45,7 @@ static void php_zhtmltopdf_init_globals(zend_zhtmltopdf_globals *zhtmltopdf_glob
  */
 const zend_function_entry zhtmltopdf_functions[] = {
 	PHP_FE(zhtml2pdf,	NULL)		/* For testing, remove later. */
+	PHP_FE(zhtml2img,	NULL)		/* For testing, remove later. */
 	PHP_FE_END	/* Must be the last line in zhtmltopdf_functions[] */
 };
 /* }}} */
@@ -88,24 +86,21 @@ PHP_INI_END()
 
 /* {{{ php_zhtmltopdf_init_globals
  */
-/* Uncomment this function if you have INI entries
+/* Uncomment this function if you have INI entries*/
 static void php_zhtmltopdf_init_globals(zend_zhtmltopdf_globals *zhtmltopdf_globals)
 {
-	zhtmltopdf_globals->global_value = 0;
-	zhtmltopdf_globals->global_string = NULL;
+    zhtmltopdf_globals->zhtml2pdf_initialized = 0;
+    zhtmltopdf_globals->zhtml2img_initialized = 0;
 }
-*/
+
 /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(zhtmltopdf)
 {
-	/* If you have INI entries, uncomment these lines 
-	REGISTER_INI_ENTRIES();
-	*/
-        ZEND_INIT_MODULE_GLOBALS(zhtmltopdf, php_zhtmltopdf_init_globals, NULL);
-	return SUCCESS;
+    ZEND_INIT_MODULE_GLOBALS(zhtmltopdf, php_zhtmltopdf_init_globals, NULL);
+    return SUCCESS;
 }
 /* }}} */
 
@@ -118,6 +113,9 @@ PHP_MSHUTDOWN_FUNCTION(zhtmltopdf)
 	*/
     if(ZHTMLTOPDF_G(zhtml2pdf_initialized)) {
         wkhtmltopdf_deinit();
+    }
+    if(ZHTMLTOPDF_G(zhtml2img_initialized)) {
+        wkhtmltoimage_deinit();
     }
 	return SUCCESS;
 }
@@ -170,9 +168,10 @@ PHP_FUNCTION(zhtml2pdf)
 	char *out = NULL;
 	char *url = NULL;
 	char *cookie = NULL;
-	int out_len, url_len, cookie_len, len;
+	int out_len, url_len, cookie_len;
+  long len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|s", &out, &out_len, &url, &url_len, &cookie, &cookie_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ss", &url, &url_len, &out, &out_len, &cookie, &cookie_len) == FAILURE) {
 		return;
 	}
 
@@ -186,8 +185,10 @@ PHP_FUNCTION(zhtml2pdf)
 
     gs = wkhtmltopdf_create_global_settings();
 
-    wkhtmltopdf_set_global_setting(gs, "out", out);
-
+    if(out) {
+      wkhtmltopdf_set_global_setting(gs, "out", out);
+    }
+    
     if(cookie){
         wkhtmltopdf_set_global_setting(gs, "load.cookieJar", cookie);
     }
@@ -196,11 +197,78 @@ PHP_FUNCTION(zhtml2pdf)
     wkhtmltopdf_set_object_setting(os, "page", url);
     c = wkhtmltopdf_create_converter(gs);
     wkhtmltopdf_add_object(c, os, NULL);
+    if(!wkhtmltopdf_convert(c)) {
+      RETURN_FALSE;
+      return;
+    }
     
-    int ret;
-    ret = wkhtmltopdf_convert(c);
-    wkhtmltopdf_destroy_converter(c);
-    RETVAL_BOOL(ret);
+    if(out) {
+      wkhtmltopdf_destroy_converter(c);
+      RETURN_TRUE;
+    } else {
+      const unsigned char * data;
+      len = wkhtmltopdf_get_output(c, &data);
+      wkhtmltopdf_destroy_converter(c);
+      if(len > 0) {
+        //RETURN_LONG(len);
+        RETURN_STRINGL(data, len, 1);
+      } else {
+        RETURN_FALSE;
+      }
+    }
+    
+}
+
+PHP_FUNCTION(zhtml2img)
+{
+  char *url = NULL;
+  char *fmt = NULL;
+  char *out = NULL;
+  int url_len, fmt_len, out_len;
+  long len;
+  const unsigned char * data;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ss", &url, &url_len, &out, &out_len, &fmt, &fmt_len) == FAILURE) {
+    return;
+  }
+
+    if(!ZHTMLTOPDF_G(zhtml2img_initialized)) {
+        ZHTMLTOPDF_G(zhtml2img_initialized) = wkhtmltoimage_init(0);
+    }
+
+    wkhtmltoimage_global_settings * gs;
+    wkhtmltoimage_converter * c;
+
+
+    gs = wkhtmltoimage_create_global_settings();
+
+    wkhtmltoimage_set_global_setting(gs, "in", url);
+
+    if(fmt == NULL) {
+      fmt = "jpeg";
+    }
+
+    wkhtmltoimage_set_global_setting(gs, "fmt", fmt);
+
+    if(out) {
+      wkhtmltoimage_set_global_setting(gs, "out", out);
+    }
+
+    c = wkhtmltoimage_create_converter(gs, NULL);
+
+    if (!wkhtmltoimage_convert(c)) {
+      RETURN_FALSE;
+      return;
+    }
+
+    if(out) {
+      wkhtmltoimage_destroy_converter(c);
+      RETURN_TRUE;
+    } else {
+      len = wkhtmltoimage_get_output(c, &data);
+      wkhtmltoimage_destroy_converter(c);
+      RETURN_STRINGL(data, len, 1);
+    }
 }
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and 
