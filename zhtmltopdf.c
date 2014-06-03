@@ -21,6 +21,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <string.h>
 
 #include "php.h"
 #include "php_ini.h"
@@ -37,17 +38,10 @@ ZEND_DECLARE_MODULE_GLOBALS(zhtmltopdf)
 
 static void php_zhtmltopdf_init_globals(zend_zhtmltopdf_globals *zhtmltopdf_globals)
 {
-    zhtmltopdf_globals.zhtml2pdf_initialized = 0;
+    zhtmltopdf_globals->zhtml2pdf_initialized = 0;
 }
 
 
-
-PHP_MINIT_FUNCTION(zhtmltopdf)
-{
-    ZEND_INIT_MODULE_GLOBALS(zhtmltopdf, php_zhtmltopdf_init_globals, NULL);
-    return SUCCESS;
-
-}
 /* {{{ zhtmltopdf_functions[]
  *
  * Every user visible function must have an entry in zhtmltopdf_functions[].
@@ -110,6 +104,7 @@ PHP_MINIT_FUNCTION(zhtmltopdf)
 	/* If you have INI entries, uncomment these lines 
 	REGISTER_INI_ENTRIES();
 	*/
+        ZEND_INIT_MODULE_GLOBALS(zhtmltopdf, php_zhtmltopdf_init_globals, NULL);
 	return SUCCESS;
 }
 /* }}} */
@@ -177,13 +172,12 @@ PHP_FUNCTION(zhtml2pdf)
 	char *cookie = NULL;
 	int out_len, url_len, cookie_len, len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|s", &our, &out_len, &url, &url_len, &cookie, &cookie_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|s", &out, &out_len, &url, &url_len, &cookie, &cookie_len) == FAILURE) {
 		return;
 	}
 
     if(!ZHTMLTOPDF_G(zhtml2pdf_initialized)) {
-        ZHTMLTOPDF_G(zhtml2pdf_initialized)= wkhtmltopdf_init(false);
-        
+        ZHTMLTOPDF_G(zhtml2pdf_initialized) = wkhtmltopdf_init(0);
     }
     wkhtmltopdf_global_settings * gs;
     wkhtmltopdf_object_settings * os;
@@ -200,11 +194,12 @@ PHP_FUNCTION(zhtml2pdf)
 
     os = wkhtmltopdf_create_object_settings();
     wkhtmltopdf_set_object_setting(os, "page", url);
+    c = wkhtmltopdf_create_converter(gs);
     wkhtmltopdf_add_object(c, os, NULL);
     
     int ret;
     ret = wkhtmltopdf_convert(c);
-    wkhtmltopdf_destroy_converter(c)
+    wkhtmltopdf_destroy_converter(c);
     RETVAL_BOOL(ret);
 }
 /* }}} */

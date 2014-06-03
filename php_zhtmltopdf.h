@@ -51,7 +51,7 @@ PHP_FUNCTION(zhtml2pdf);	/* For testing, remove later. */
 	and END macros here:     
 */
 ZEND_BEGIN_MODULE_GLOBALS(zhtmltopdf)
-	int  zhtml2pdf_initialized;
+int  zhtml2pdf_initialized;
 ZEND_END_MODULE_GLOBALS(zhtmltopdf)
 /**/
 

@@ -21,7 +21,7 @@ if test "$PHP_WKHTMLTOX_DIR" != "no"; then
   dnl Write more examples of tests here...
 
   dnl # --with-zhtmltopdf -> check with-path
-  SEARCH_PATH="$PHP_WKHTMLTOX_DIR /usr/local /usr"     # you might want to change this
+  SEARCH_PATH="$PHP_WKHTMLTOX_DIR wkhtmltox /usr/local /usr"     # you might want to change this
   SEARCH_FOR="include/wkhtmltox/pdf.h"  # you most likely want to change this
   dnl if test -r $PHP_ZHTMLTOPDF/$SEARCH_FOR; then # path given as parameter
   dnl   ZHTMLTOPDF_DIR=$PHP_ZHTMLTOPDF
@@ -36,12 +36,12 @@ if test "$PHP_WKHTMLTOX_DIR" != "no"; then
   dnl fi
   dnl
   if test -z "$ZHTMLTOPDF_DIR" -o -z "$ZHTMLTOPDF_DIR/include/wkhtmltox"; then
-    AC_MSG_RESULT([$ZHTMLTOPDF_DIR not found])
+    AC_MSG_RESULT([$ZHTMLTOPDF_DIR not found 1])
     AC_MSG_ERROR([$SEARCH_PATH || $ZHTMLTOPDF_DIR ||  Please reinstall the zhtmltopdf distribution])
   fi
 
   dnl # --with-zhtmltopdf -> add include path
-  PHP_ADD_INCLUDE($ZHTMLTOPDF_DIR/include/wkhtmltox)
+  PHP_ADD_INCLUDE($ZHTMLTOPDF_DIR/include)
 
   dnl # --with-zhtmltopdf -> check for lib and symbol presence
   dnl LIBNAME=zhtmltopdf # you may want to change this
@@ -52,7 +52,7 @@ if test "$PHP_WKHTMLTOX_DIR" != "no"; then
     PHP_ADD_LIBRARY_WITH_PATH(wkhtmltox, $ZHTMLTOPDF_DIR/lib, ZHTMLTOPDF_SHARED_LIBADD)
     AC_DEFINE(HAVE_ZHTMLTOPDFLIB,1,[libwkhtmltox yes ])
   ],[
-    AC_MSG_ERROR([$ZHTMLTOPDF_DIR/include no found])
+    AC_MSG_ERROR([$ZHTMLTOPDF_DIR/include no found 2])
   ],[
     -L$ZHTMLTOPDF_DIR/lib -lm
   ])
