@@ -35,3 +35,15 @@ zhtmltopdf， 把html页面转成pdf或image的php扩展
 	//只输入参数，可直接到到图片的数据, 可直接echo或输出到浏览器
 	$content = zhtml2img("http://www.baidu.com");
 	echo $content;
+
+一些问题
+===
+
+   一、线上服务器乱码解决：
+   1）系统的LANG设置为： LANG=zh_CN.UTF-8
+   2) 缺少字体，可以把本地的字体copy到服务器上 /usr/share/fonts/chinese/TrueType目录下
+
+   二、非linux内核系统
+   1) 去：https://github.com/wkhtmltopdf/wkhtmltopdf 下载，然后编译安装到xxx目录，
+   2）安装扩展时 ./configure --with-wkhtmltox-dir=xxx (xxx为1里wkhtmltopdf的安装目录)
+
