@@ -45,9 +45,9 @@ zhtmltopdf， 把html页面转成pdf或image的php扩展
 
    2) 缺少字体，可以把本地的字体copy到服务器上 /usr/share/fonts/chinese/TrueType目录下
 
-   二、非linux内核系统
+   二、mac等系统编译问题 (自带的so是在linux amd64 下编译的)
 
    1) 去：https://github.com/wkhtmltopdf/wkhtmltopdf 下载，然后编译安装到xxx目录，
-   
+
    2）安装扩展时 ./configure --with-wkhtmltox-dir=xxx (xxx为1里wkhtmltopdf的安装目录)
 
