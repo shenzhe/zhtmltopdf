@@ -145,7 +145,7 @@ PHP_MINFO_FUNCTION(zhtmltopdf)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "zhtmltopdf support", "enabled");
-	php_info_print_table_header(2, "wkhtmltopdf_version", wkhtmltopdf_version());
+	php_info_print_table_header(2, "version", "0.2");
 	php_info_print_table_header(2, "Author", "shenzhe163@gmail.com");
 	php_info_print_table_end();
 
@@ -224,11 +224,13 @@ PHP_FUNCTION(zhtml2img)
   char *url = NULL;
   char *fmt = NULL;
   char *out = NULL;
+  long quality = 80;
   int url_len, fmt_len, out_len;
+
   long len;
   const unsigned char * data;
 
-  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ss", &url, &url_len, &out, &out_len, &fmt, &fmt_len) == FAILURE) {
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ssl", &url, &url_len, &out, &out_len, &fmt, &fmt_len, &quality) == FAILURE) {
     return;
   }
 
@@ -253,6 +255,12 @@ PHP_FUNCTION(zhtml2img)
     if(out) {
       wkhtmltoimage_set_global_setting(gs, "out", out);
     }
+
+    if(quality < 1) {
+      quality = 80;
+    }
+
+    wkhtmltoimage_set_global_setting(gs, "quality", out);
 
     c = wkhtmltoimage_create_converter(gs, NULL);
 

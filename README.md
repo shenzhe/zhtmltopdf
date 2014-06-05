@@ -27,8 +27,9 @@ zhtmltopdf， 把html页面转成pdf或image的php扩展
 	echo $content;
 
 	//参数1： 网址
-	//参数2： 输出的img文件名
-	//会生成图片文件
+	//参数2： 生成的img文件名 （可选）
+	//参数3:  图片fmt(可选) jpeg(默认), png, bmp
+	//参数4:  图片质量(可选) 默认80
 	zhtml2img("http://www.baidu.com", "./baidu.jpg");
 
 	//参数1： 网址
