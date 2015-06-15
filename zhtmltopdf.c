@@ -260,7 +260,7 @@ PHP_FUNCTION(zhtml2img)
       quality = 80;
     }
 
-    wkhtmltoimage_set_global_setting(gs, "quality", out);
+    wkhtmltoimage_set_global_setting(gs, "quality", quality);
 
     c = wkhtmltoimage_create_converter(gs, NULL);
 
