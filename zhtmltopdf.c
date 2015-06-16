@@ -259,8 +259,14 @@ PHP_FUNCTION(zhtml2img)
     if(quality < 1) {
       quality = 80;
     }
-
-    wkhtmltoimage_set_global_setting(gs, "quality", quality);
+    //convert quality from long to char
+    //to avoid segmentfault in libwkhtmltox.so.o
+    const int n = snprintf(NULL,0,"%ld",quality);
+    char buffer[n+1];
+    int cnt = snprintf(buffer,n+1,"%ld",quality);
+    buffer[n] = '\0';
+    assert(cnt == n);
+    wkhtmltoimage_set_global_setting(gs,"quality",buffer);
 
     c = wkhtmltoimage_create_converter(gs, NULL);
 
