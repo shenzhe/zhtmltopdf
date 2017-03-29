@@ -211,7 +211,7 @@ PHP_FUNCTION(zhtml2pdf)
       wkhtmltopdf_destroy_converter(c);
       if(len > 0) {
         //RETURN_LONG(len);
-#ifdef PHP_MAJOR_VERSION >= 7
+#if PHP_MAJOR_VERSION >= 7
 		zend_string *ret = zend_string_init(data, len-1, 1);
 		RETURN_STR(ret);
 #else
@@ -286,7 +286,7 @@ PHP_FUNCTION(zhtml2img)
     } else {
       len = wkhtmltoimage_get_output(c, &data);
       wkhtmltoimage_destroy_converter(c);
-#ifdef PHP_MAJOR_VERSION >= 7
+#if PHP_MAJOR_VERSION >= 7
 		zend_string *ret = zend_string_init(data, len-1, 1);
 		RETURN_STR(ret);
 #else
