@@ -211,7 +211,12 @@ PHP_FUNCTION(zhtml2pdf)
       wkhtmltopdf_destroy_converter(c);
       if(len > 0) {
         //RETURN_LONG(len);
+#if PHP_MAJOR_VERSION >= 7
+		zend_string *ret = zend_string_init(data, len-1, 1);
+		RETURN_STR(ret);
+#else
         RETURN_STRINGL(data, len, 1);
+#endif
       } else {
         RETURN_FALSE;
       }
@@ -281,7 +286,12 @@ PHP_FUNCTION(zhtml2img)
     } else {
       len = wkhtmltoimage_get_output(c, &data);
       wkhtmltoimage_destroy_converter(c);
-      RETURN_STRINGL(data, len, 1);
+#if PHP_MAJOR_VERSION >= 7
+		zend_string *ret = zend_string_init(data, len-1, 1);
+		RETURN_STR(ret);
+#else
+        RETURN_STRINGL(data, len, 1);
+#endif
     }
 }
 /* }}} */
