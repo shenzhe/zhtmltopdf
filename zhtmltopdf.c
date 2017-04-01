@@ -225,12 +225,14 @@ PHP_FUNCTION(zhtml2img)
   char *fmt = NULL;
   char *out = NULL;
   long quality = 80;
+  long screenWidth = 1000;
+  long screenHeight = NULL;
   int url_len, fmt_len, out_len;
 
   long len;
   const unsigned char * data;
 
-  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ssl", &url, &url_len, &out, &out_len, &fmt, &fmt_len, &quality) == FAILURE) {
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sslll", &url, &url_len, &out, &out_len, &fmt, &fmt_len, &quality, &screenWidth, &screenHeight) == FAILURE) {
     return;
   }
 
@@ -267,6 +269,27 @@ PHP_FUNCTION(zhtml2img)
     buffer[n] = '\0';
     assert(cnt == n);
     wkhtmltoimage_set_global_setting(gs,"quality",buffer);
+
+    // 设置宽度
+    const int k = snprintf(NULL,0,"%ld",screenWidth);
+    char swBuffer[k+1];
+    int swCnt = snprintf(swBuffer,k+1,"%ld",screenWidth);
+    swBuffer[k] = '\0';
+    assert(swCnt == k);
+    wkhtmltoimage_set_global_setting(gs, "screenWidth", swBuffer);
+
+    // 设置高度
+    if (screenHeight) {
+      if (screenHeight < 1) {
+        screenHeight = 1000;
+      }
+      const int h = snprintf(NULL,0,"%ld",screenHeight);
+      char shBuffer[h+1];
+      int shCnt = snprintf(shBuffer,h+1,"%ld",screenHeight);
+      shBuffer[h] = '\0';
+      assert(shCnt == h);
+      wkhtmltoimage_set_global_setting(gs, "screenHeight", shBuffer);
+    }
 
     c = wkhtmltoimage_create_converter(gs, NULL);
 
