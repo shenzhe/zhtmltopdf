@@ -271,6 +271,9 @@ PHP_FUNCTION(zhtml2img)
     wkhtmltoimage_set_global_setting(gs,"quality",buffer);
 
     // 设置宽度
+    if (screenWidth < 1) {
+      screenWidth = 1000;
+    }
     const int k = snprintf(NULL,0,"%ld",screenWidth);
     char swBuffer[k+1];
     int swCnt = snprintf(swBuffer,k+1,"%ld",screenWidth);
